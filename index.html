@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -522,14 +522,21 @@ async function loadFlights() {
       return fetch(url, opts);
     }
 
-    // Try proxies in order — each passes Basic Auth credentials through URL
-    var authUrl = 'https://' + encodeURIComponent(user) + ':' + encodeURIComponent(pass) + '@opensky-network.org/api/states/all';
+    // Try Netlify serverless proxy first (only works on live site)
+    if (!data || !data.states) {
+      try {
+        console.log('[FLIGHTS] Trying Netlify proxy...');
+        var rn = await fetch('/api/opensky');
+        console.log('[FLIGHTS] Netlify proxy response:', rn.status);
+        if (rn.ok) { data = await rn.json(); }
+      } catch(e) { console.log('[FLIGHTS] Netlify proxy failed:', e.message); }
+    }
+
+    // Try public proxies as fallback
     var proxies = [
-      'https://proxy.cors.sh/' + openSkyUrl,
       'https://corsproxy.io/?' + encodeURIComponent(openSkyUrl),
       'https://api.allorigins.win/raw?url=' + encodeURIComponent(openSkyUrl),
       'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(openSkyUrl),
-      'https://thingproxy.freeboard.io/fetch/' + openSkyUrl,
     ];
     for (var pi=0; pi<proxies.length; pi++) {
       try {
