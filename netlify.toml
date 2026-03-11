@@ -1,0 +1,7 @@
+[build]
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/opensky"
+  to = "/.netlify/functions/opensky"
+  status = 200
